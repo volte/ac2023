@@ -3,6 +3,7 @@ use crate::aoc::prelude::*;
 pub const SOLUTIONS: Solutions = (&SolutionPart1, &SolutionPart2);
 
 pub struct SolutionPart1;
+pub struct SolutionPart2;
 
 impl Aoc for SolutionPart1 {
     fn solve(&self, input: &str) -> String {
@@ -67,8 +68,6 @@ impl DigitScanner<'_> {
         }
     }
 }
-
-pub struct SolutionPart2;
 
 impl Aoc for SolutionPart2 {
     fn solve(&self, input: &str) -> String {

@@ -33,12 +33,14 @@ struct Game {
 }
 
 struct GameIterator<'s> {
-    string: &'s str,
+    scanner: Scanner<'s>,
 }
 
 impl GameIterator<'_> {
     fn new(string: &str) -> GameIterator {
-        GameIterator { string }
+        GameIterator {
+            scanner: Scanner::new(string, true),
+        }
     }
 }
 
@@ -46,7 +48,7 @@ impl Iterator for GameIterator<'_> {
     type Item = Game;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.string.is_empty() {
+        if self.scanner.is_finished() {
             return None;
         }
 
@@ -55,16 +57,15 @@ impl Iterator for GameIterator<'_> {
             hands: Vec::new(),
         };
 
-        let mut scanner = Scanner::new(self.string, true);
-        scanner.try_scan_string("Game ").unwrap();
-        game.id = scanner.try_scan_int().unwrap();
-        scanner.try_scan_string(":").unwrap();
+        self.scanner.scan_string("Game");
+        game.id = self.scanner.scan_signed_int().parse::<i32>();
+        self.scanner.scan_string(":");
 
         loop {
             let mut hand = GameHand::default();
             loop {
-                let count = scanner.try_scan_int().unwrap();
-                let color: &str = scanner.try_scan_regex(r"(red|green|blue)").unwrap();
+                let count = self.scanner.scan_signed_int().parse::<i32>();
+                let color: &str = self.scanner.scan_regex(r"(red|green|blue)").as_str();
                 let color = match color {
                     "red" => &mut hand.red,
                     "green" => &mut hand.green,
@@ -73,18 +74,17 @@ impl Iterator for GameIterator<'_> {
                 };
                 *color += count;
 
-                if scanner.try_scan_string(",").is_none() {
+                if self.scanner.try_scan_string(",").is_none() {
                     break;
                 }
             }
             game.hands.push(hand);
 
-            if scanner.try_scan_string(";").is_none() {
+            if self.scanner.try_scan_string(";").is_none() {
                 break;
             }
         }
 
-        self.string = scanner.string;
         Some(game)
     }
 }
