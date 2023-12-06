@@ -3,7 +3,7 @@
 use std::{collections::HashMap, str::FromStr, sync::Mutex};
 
 use once_cell::sync::Lazy;
-use regex::{Regex, RegexBuilder};
+use regex::{Captures, Regex, RegexBuilder};
 
 static REGEX_CACHE: Lazy<Mutex<HashMap<&'static str, Regex>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
@@ -51,7 +51,8 @@ impl<'s> Token<'s> {
 
     /// Parse the token's value and return the result, or panic if parsing fails
     pub fn parse<T: FromStr>(&self) -> T {
-        self.try_parse().expect("Failed to parse token")
+        self.try_parse()
+            .expect(format!("Failed to parse token '{}'", self.as_str()).as_str())
     }
 
     /// Return the token's offset relative to the start of the input
@@ -145,6 +146,36 @@ impl<'s> Scanner<'s> {
             .expect(format!("Expected string '{}' at {}", s, offset).as_str())
     }
 
+    /// Scan for a regular expression match and return each matched capture group as its own token, or None if no match is found
+    pub fn try_scan_regex_captures<const N: usize>(
+        &mut self,
+        regex: &'static str,
+    ) -> Option<[Token<'s>; N]> {
+        self.maybe_skip_whitespace();
+
+        if self.is_finished() {
+            return None;
+        }
+
+        let mut cache = REGEX_CACHE.lock().unwrap();
+        let regex = cache.entry(regex).or_insert_with(|| {
+            RegexBuilder::new(format!("^{}", regex).as_str())
+                .build()
+                .unwrap()
+        });
+
+        if let Some(captures) = regex.captures(self.remaining()) {
+            if self.debug {
+                println!("Regex match ({}): {:?}", regex, captures);
+            }
+            let (all, extracted) = captures.extract::<N>();
+            self.consume_token(all.len());
+            Some(extracted.map(|token| Token::new(token, 0, token.len())))
+        } else {
+            None
+        }
+    }
+
     /// Scan for a regular expression match and return the matched string slice, or None if no match is found
     pub fn try_scan_regex(&mut self, regex: &'static str) -> Option<Token<'s>> {
         self.maybe_skip_whitespace();
@@ -162,7 +193,7 @@ impl<'s> Scanner<'s> {
 
         if let Some(m) = regex.find(self.remaining()) {
             if self.debug {
-                println!("Regex match: {:?}", m);
+                println!("Regex match ({}): {:?}", regex, m);
             }
             Some(self.consume_token(m.len()))
         } else {

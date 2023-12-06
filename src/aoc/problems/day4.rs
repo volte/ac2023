@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use crate::{aoc::prelude::*, util::scanner::Scanner};
 
 pub struct SolutionPart1;
