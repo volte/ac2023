@@ -7,6 +7,7 @@ mod day4;
 mod day5;
 mod day6;
 mod day7;
+mod day8;
 
 /// Return a vector of all solved problems, in order as a pair of (part1, part2)
 pub fn all_problems() -> Vec<Solutions> {
@@ -18,5 +19,6 @@ pub fn all_problems() -> Vec<Solutions> {
         day5::SOLUTIONS,
         day6::SOLUTIONS,
         day7::SOLUTIONS,
+        day8::SOLUTIONS,
     ]
 }
