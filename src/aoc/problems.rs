@@ -1,6 +1,7 @@
 use super::Solutions;
 
 mod day1;
+mod day10;
 mod day2;
 mod day3;
 mod day4;
@@ -22,5 +23,6 @@ pub fn all_problems() -> Vec<Solutions> {
         day7::SOLUTIONS,
         day8::SOLUTIONS,
         day9::SOLUTIONS,
+        day10::SOLUTIONS,
     ]
 }
