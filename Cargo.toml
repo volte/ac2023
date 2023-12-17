@@ -8,6 +8,7 @@ regex = "1.1"
 once_cell = "1.18"
 nalgebra-glm = "0.18"
 num = "0.4"
+aoc2023-macros = { path = "macros" }
 
 [build-dependencies]
 copy_to_output = "2.1"

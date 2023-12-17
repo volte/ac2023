@@ -13,5 +13,5 @@ fn main() {
     let stage = args[2].parse::<u8>().expect("Invalid stage");
     let input = std::fs::read_to_string(format!("inputs/day{}.txt", day)).unwrap();
 
-    println!("{}", aoc::solve_problem(day, stage, &input));
+    println!("{:08}", aoc::solve_problem(day, stage, &input));
 }
